@@ -1,10 +1,9 @@
-"""Tables, figures and number macros of the revision-2 experiments.
+"""Tables, figures and number macros of the realistic-resource and LLM experiments.
 
-Reads results_r2/*.json[l] (and the journal's results/ read-only) and writes
-figures/{table_*,fig_*}_r2 files and figures/numbers_r2.tex.
-Every revision-2 number in the paper comes from here.
+Reads results/*.json[l] and writes the corresponding tables and figures to figures/,
+and the numbers used in the text to figures/numbers.tex.
 
-    python -m gosc_ext.report
+    python -m experiments.plot_realistic
 """
 import json
 import os
@@ -16,8 +15,8 @@ import numpy as np  # noqa: E402
 
 from experiments.plot import FIG  # noqa: E402  (shared style, read-only)
 
-from .run import ARMS, HEADLINE, OUT  # noqa: E402
-from .validate import journal_frozen, load_jsonl, reference  # noqa: E402
+from experiments.run_realistic import ARMS, HEADLINE, OUT  # noqa: E402
+from experiments.validate_realistic import main_frozen, load_jsonl, reference  # noqa: E402
 
 RES = os.path.join(os.path.dirname(__file__), "..", "results")
 W1, W2 = 3.45, 7.0
@@ -100,10 +99,10 @@ def theory():
 
 # ------------------------------------------------------------------------------
 def noise():
-    """Fresh-seed channel-use ratio of the journal's frozen periodic point to each
+    """Fresh-seed channel-use ratio of the main-evaluation frozen periodic point to each
     value-estimation arm (re-selected per setting), and valuation accuracy."""
     v = load("validate_noise.json")
-    jv = journal_frozen()
+    jv = main_frozen()
     rows = load_jsonl("noise")
     rho = {}
     for arm in ARMS:
@@ -148,7 +147,7 @@ def noise():
         lines.append(f"{ARM_NAMES[arm]} & {r:.2f} & " + " & ".join(cells) + " \\\\")
         if arm == "exact":
             lines.append("\\midrule")
-    with open(os.path.join(FIG, "table_noise_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "table_noise.tex"), "w") as f:
         f.write("\n".join(lines) + "\n")
     # figure
     fig, ax = plt.subplots(figsize=(W1, 2.9))
@@ -172,7 +171,7 @@ def noise():
     ax.set_xlabel("Value estimate (accuracy decreases to the right)")
     ax.legend(frameon=False, fontsize=5.8, ncol=3, loc="upper center", bbox_to_anchor=(0.5, 1.22))
     fig.tight_layout()
-    fig.savefig(os.path.join(FIG, "fig_noise_r2.pdf"))
+    fig.savefig(os.path.join(FIG, "fig_noise.pdf"))
     plt.close(fig)
     return res, rho
 
@@ -227,7 +226,7 @@ def overhead():
             lines.append(f"\\quad {NAMES[st]} & " + " & ".join(cells) + " \\\\")
         if key == "ul":
             lines.append("\\midrule")
-    with open(os.path.join(FIG, "table_overhead_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "table_overhead.tex"), "w") as f:
         f.write("\n".join(lines) + "\n")
     # cost breakdown, search default, fresh seeds
     lines = []
@@ -252,7 +251,7 @@ def overhead():
             lines.append(f"\\quad {name} & {T:.1f} & {ul:.1f} & {oh:.1f} & {dlb:.1f} & {dlc:.1f} & {tot:.1f} \\\\")
             if name.startswith("\\textbf") and H == 0:
                 lines.append("\\midrule")
-    with open(os.path.join(FIG, "table_cost_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "table_cost.tex"), "w") as f:
         f.write("\n".join(lines) + "\n")
     return res, v
 
@@ -288,7 +287,7 @@ def shared():
                      f"{fr(r['ul'])} & {fr(r['tot'])} \\\\")
         if st == "search-B150":
             lines.append("\\midrule")
-    with open(os.path.join(FIG, "table_shared_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "table_shared.tex"), "w") as f:
         f.write("\n".join(lines) + "\n")
     # figure: search frontiers under shared budgets (uplink data + control)
     fig, axes = plt.subplots(1, 3, figsize=(W2, 2.3), sharey=True)
@@ -329,7 +328,7 @@ def shared():
     h, lb = axes[0].get_legend_handles_labels()
     fig.legend(h, lb, frameon=False, fontsize=6.5, ncol=4, loc="lower center", bbox_to_anchor=(0.5, 0.0))
     fig.tight_layout(rect=(0, 0.1, 1, 1))
-    fig.savefig(os.path.join(FIG, "fig_shared_r2.pdf"))
+    fig.savefig(os.path.join(FIG, "fig_shared.pdf"))
     plt.close(fig)
     shared_column(rows)
     return res
@@ -371,7 +370,7 @@ def shared_column(rows):
     h, lb = axes[0].get_legend_handles_labels()
     fig.legend(h, lb, frameon=False, fontsize=5.8, ncol=3, loc="lower center", bbox_to_anchor=(0.5, 0.0))
     fig.tight_layout(rect=(0, 0.1, 1, 1), w_pad=0.4)
-    fig.savefig(os.path.join(FIG, "fig_shared_col_r2.pdf"))
+    fig.savefig(os.path.join(FIG, "fig_shared_col.pdf"))
     plt.close(fig)
 
 
@@ -379,7 +378,7 @@ def shared_column(rows):
 def llm():
     rows = [json.loads(line) for line in open(os.path.join(RES, "llm_mixed.jsonl"))]
     new = []
-    p = os.path.join(OUT, "llm_r2.jsonl")
+    p = os.path.join(OUT, "llm_extended.jsonl")
     if os.path.exists(p):
         new = [json.loads(line) for line in open(p)]
     seen = {(r["team"], r["scheme"], r["seed"]) for r in rows}
@@ -416,7 +415,7 @@ def llm():
             lines.append(f" & Genie & {ci(gen)[0]:.1f} $\\pm$ {ci(gen)[1]:.1f} & -- & & \\\\")
         lines.append("\\midrule")
     lines = lines[:-1]
-    with open(os.path.join(FIG, "table_llm_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "table_llm_extended.tex"), "w") as f:
         f.write("\n".join(lines) + "\n")
     # interaction with the planner team (same seeds): does periodic degrade more?
     by = {}
@@ -466,7 +465,7 @@ def main():
             summary[name] = fn()
         except FileNotFoundError as e:
             print("skip", name, e)
-    with open(os.path.join(FIG, "numbers_r2.tex"), "w") as f:
+    with open(os.path.join(FIG, "numbers.tex"), "w") as f:
         for k, v in MACROS.items():
             f.write(f"\\newcommand{{\\{k}}}{{{v}}}\n")
 
@@ -478,7 +477,7 @@ def main():
         if isinstance(o, (np.floating, np.integer)):
             return o.item()
         return o
-    with open(os.path.join(OUT, "summary_r2.json"), "w") as f:
+    with open(os.path.join(OUT, "summary_realistic.json"), "w") as f:
         json.dump(js(summary), f, indent=1)
     print(json.dumps(js(summary), indent=1)[:6000])
 

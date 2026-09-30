@@ -19,13 +19,11 @@ this repository, and every mission can be re-simulated from its seed.
 
 | Path | What it contains |
 |---|---|
-| `gosc/` | The simulator: world and sensing, beliefs, block-fading channel (outage and finite-blocklength models), message formats, planner and LLM agents, value functions, GOSC scheduler and all baselines |
-| `gosc_ext/` | Extensions used in the revision (imperfect values, per-packet overhead with uplink + downlink cost accounting, shared network-wide uplink, scheduler-structure analysis). It subclasses `gosc/` and reproduces it exactly with default settings |
+| `gosc/` | The simulator: world and sensing, beliefs, block-fading channel (outage and finite-blocklength models), message formats, planner and LLM agents, value functions, GOSC scheduler and all baselines; `gosc/realistic.py` adds imperfect values, per-packet overhead with uplink + downlink cost accounting, and a shared network-wide uplink |
 | `experiments/` | Campaigns, statistics, figures and tables of the main evaluation |
-| `tests/`, `tests_ext/` | Unit and regression tests |
-| `results/` | Per-mission results of the main evaluation (JSON) and cached LLM responses (`results/llm_cache/`) |
-| `results_r2/` | Per-mission results of the revision experiments (large files gzip-compressed) and cached LLM responses (`results_r2/llm_cache/`) |
-| `scripts/unpack_results.sh` | Decompresses `results_r2/*.jsonl.gz` |
+| `tests/` | Unit and regression tests |
+| `results/` | Per-mission results of every experiment (large files gzip-compressed) and cached LLM responses (`results/llm_cache/`) |
+| `scripts/unpack_results.sh` | Decompresses `results/*.jsonl.gz` |
 
 ## Installation
 
@@ -34,8 +32,8 @@ Python 3.9 or later.
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
-./scripts/unpack_results.sh                          # decompress the revision results
-.venv/bin/python -m pytest -q tests tests_ext         # 85 tests
+./scripts/unpack_results.sh                          # decompress the large result files
+.venv/bin/python -m pytest -q tests                   # 85 tests
 ```
 
 Run one mission:
@@ -52,7 +50,7 @@ seconds without re-simulating; they are written to `figures/`.
 ```bash
 .venv/bin/python -m experiments.plot                  # main evaluation
 .venv/bin/python -m experiments.plot_revision         # value functions, rescue task, validation
-PYTHONPATH=. .venv/bin/python -m gosc_ext.report      # revision experiments (Tables VII, IX-XII)
+.venv/bin/python -m experiments.plot_realistic        # Tables VII, IX-XII, Figures 3 and 5
 ```
 
 To re-simulate from scratch (times on an 8-core Apple M1):
@@ -66,23 +64,23 @@ To re-simulate from scratch (times on an 8-core Apple M1):
 .venv/bin/python -m experiments.run_joint --seeds 100
 .venv/bin/python -m experiments.diagnose_value && .venv/bin/python -m experiments.analyze_fidelity
 
-# revision experiments
-PYTHONPATH=. .venv/bin/python -m gosc_ext.analyze_theory --seeds 30                  # Theorems 1-2, Proposition 2
-PYTHONPATH=. .venv/bin/python -m gosc_ext.run --only noise shared overhead           # ~6.5 h on 7 workers
-PYTHONPATH=. .venv/bin/python -m gosc_ext.validate --only noise shared overhead      # fresh seeds
-PYTHONPATH=. .venv/bin/python -m gosc_ext.run_tv_where                               # belief divergence, K=10 / clustered
+# imperfect values, packet overhead, shared uplink, scheduler structure
+.venv/bin/python -m experiments.analyze_theory --seeds 30                    # Theorems 1-2, Proposition 2
+.venv/bin/python -m experiments.run_realistic --only noise shared overhead     # ~6.5 h on 7 workers
+.venv/bin/python -m experiments.validate_realistic --only noise shared overhead # fresh seeds
+.venv/bin/python -m experiments.run_belief_divergence                         # belief divergence, K=10 / clustered
 ```
 
 | Paper item | Produced by | Results |
 |---|---|---|
 | Main result, fresh-seed validation (Table IV) and frozen points (Table XIII) | `experiments/validate_headline.py`, `experiments/plot_revision.py` | `results/rev_validation.json` |
 | Representations (Table V), SNR sweep (Figure 4) | `experiments/run_all.py`, `experiments/plot.py` | `results/default.json`, `results/snr.json` |
-| Rescue frontiers (Figure 2), value functions (Table VI) | `experiments/run_revision.py`, `gosc_ext/run_tv_where.py` | `results/rev_*.json`, `results_r2/where_tom_tv.jsonl` |
-| Scheduler structure (Section IV) | `gosc_ext/analyze_theory.py` | `results_r2/theory.json` |
-| Value accuracy (Table VII, Figure 3) | `gosc_ext/run.py`, `gosc_ext/validate.py` | `results_r2/noise.jsonl.gz`, `results_r2/validate_noise.json` |
-| Packet overhead and total cost (Tables IX, X) | same | `results_r2/overhead.jsonl.gz`, `results_r2/validate_overhead.json` |
-| Shared uplink (Table XI, Figure 5) | same | `results_r2/shared.jsonl.gz`, `results_r2/validate_shared.json` |
-| LLM teams (Table XII) | `experiments/run_llm.py`, `gosc_ext/run_llm.py` | `results/llm_mixed.jsonl`, `results_r2/llm_r2.jsonl` |
+| Rescue frontiers (Figure 2), value functions (Table VI) | `experiments/run_revision.py`, `experiments/run_belief_divergence.py` | `results/rev_*.json`, `results/belief_divergence.jsonl` |
+| Scheduler structure (Section IV) | `experiments/analyze_theory.py` | `results/theory.json` |
+| Value accuracy (Table VII, Figure 3) | `experiments/run_realistic.py`, `experiments/validate_realistic.py` | `results/noise.jsonl.gz`, `results/validate_noise.json` |
+| Packet overhead and total cost (Tables IX, X) | same | `results/overhead.jsonl.gz`, `results/validate_overhead.json` |
+| Shared uplink (Table XI, Figure 5) | same | `results/shared.jsonl.gz`, `results/validate_shared.json` |
+| LLM teams (Table XII) | `experiments/run_llm.py`, `experiments/run_llm_extended.py` | `results/llm_mixed.jsonl`, `results/llm_extended.jsonl` |
 
 ## LLM agents
 
@@ -95,11 +93,11 @@ without Ollama. To query the models again:
 ollama serve &
 ollama pull qwen2.5:3b && ollama pull llama3.2:3b && ollama pull qwen2.5:7b
 .venv/bin/python -m experiments.run_llm --seeds 50 --teams planner mixed
-PYTHONPATH=. .venv/bin/python -m gosc_ext.run_llm --seeds 50 --teams mixed_llama
-PYTHONPATH=. .venv/bin/python -m gosc_ext.run_llm --seeds 30 --teams mixed_qwen7b
+.venv/bin/python -m experiments.run_llm_extended --seeds 50 --teams mixed_llama
+.venv/bin/python -m experiments.run_llm_extended --seeds 30 --teams mixed_qwen7b
 ```
 
-The revision runner aborts if any LLM call fails, so an unreachable server can never
+The extended LLM runner aborts if any LLM call fails, so an unreachable server can never
 silently turn LLM agents into planners.
 
 ## Reproducibility notes
@@ -108,8 +106,9 @@ silently turn LLM agents into planners.
   disjoint evaluation seeds 0-99 and, for frozen operating points, fresh seeds 3000-3099.
 - For a given seed, every scheme sees the same survivors and launch positions (common
   random numbers).
-- With default settings, `gosc_ext` reproduces the `gosc` simulator exactly; this is
-  checked by `tests_ext/` (for example, seed 0 with GOSC: 122 slots, 13,304 channel uses).
+- With default settings, `gosc/realistic.py` reproduces the base simulator exactly; this is
+  checked by `tests/test_realistic.py` (for example, seed 0 with GOSC: 122 slots, 13,304
+  channel uses).
 
 ## License
 

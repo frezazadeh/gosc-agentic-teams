@@ -1,6 +1,7 @@
-"""Revision-2 simulation campaigns (evaluation seeds 0-99).
+"""Simulation campaigns with realistic radio resources and imperfect values (evaluation
+seeds 0-99).
 
-    python -m gosc_ext.run --only noise shared overhead [--seeds 100 --workers 6]
+    python -m experiments.run_realistic --only noise shared overhead [--seeds 100 --workers 6]
 
   noise     imperfect semantic values: log-normal errors, order-of-magnitude values,
             content-independent (permuted) values, with and without the relevance
@@ -10,7 +11,7 @@
   overhead  a fixed per-packet overhead of 16/32/64 bits on every uplink packet, for
             GOSC and the full periodic family in the six headline settings
 
-Every mission is appended to results_r2/<name>.jsonl (the run can be resumed).
+Every mission is appended to results/<name>.jsonl (the run can be resumed).
 """
 import argparse
 import json
@@ -18,12 +19,12 @@ import os
 import time
 from multiprocessing import Pool
 
-from .config import ExtConfig
-from .sim import run_ext
+from gosc import Config
+from gosc import run_realistic
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "results_r2")
+OUT = os.path.join(os.path.dirname(__file__), "..", "results")
 
-B = ExtConfig()
+B = Config()
 RB = B.with_(task="rescue", deadline_min=60, deadline_max=180)
 SETTINGS = {
     "search-W100": B,
@@ -36,13 +37,13 @@ SETTINGS = {
 }
 HEADLINE = ("search-W100", "search-K10", "search-clustered", "rescue-W100", "rescue-W50", "rescue-snr-5")
 ETA_SEARCH = (0.0, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3)
-ETA_RESCUE = (0.0, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3)  # extended beyond the journal grid
+ETA_RESCUE = (0.0, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3)  # extended beyond the main-evaluation grid
 THETAS = (0.02, 0.05, 0.1, 0.2, 0.4, 1.0, 2.0)
 PERIODIC = ([("sem_ra", k, None) for k in (1, 2, 4, 8, 16)]
             + [("sem_raf", k, None) for k in (1, 2, 4, 8, 16)]
             + [("sem_ras", k, th) for k in (1, 2, 4, 8) for th in THETAS])
 ARMS = {  # value-estimation arms of the noise experiment
-    "exact": ("gosc", {}),   # rescue only (search: the journal's identical runs)
+    "exact": ("gosc", {}),   # rescue only (search: identical main-evaluation runs)
     "ln0.5": ("gosc", dict(value_mode="lognormal", value_sigma=0.5)),
     "ln1": ("gosc", dict(value_mode="lognormal", value_sigma=1.0)),
     "ln2": ("gosc", dict(value_mode="lognormal", value_sigma=2.0)),
@@ -60,11 +61,11 @@ def etas(setting):
 
 
 def noise_etas(setting):
-    """Noise arms: the journal grid without 3e-6 (between 0 and 1e-5, never the most
-    frugal point meeting a target in the journal)."""
+    """Noise arms: the main-evaluation grid without 3e-6 (between 0 and 1e-5, never the most
+    frugal point meeting a target in the main evaluation)."""
     if setting.startswith("rescue"):
         # extended upwards: inaccurate values send more at a given price, and the
-        # journal's rescue grid already met the targets at its highest price
+        # main-evaluation rescue grid already met the targets at its highest price
         return (0.0, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3)
     return tuple(e for e in etas(setting) if e != 3e-6)
 
@@ -121,7 +122,7 @@ def experiments():
 
 def _job(args):
     row, seed = args
-    out = run_ext(row["cfg"], row["scheme"], seed)
+    out = run_realistic(row["cfg"], row["scheme"], seed)
     meta = {k: v for k, v in row.items() if k != "cfg"}
     return {**meta, "seed": seed, **out}
 

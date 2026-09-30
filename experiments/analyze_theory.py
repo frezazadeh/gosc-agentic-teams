@@ -1,7 +1,7 @@
 """Empirical companion of the scheduler theory (Section IV of the revised paper).
 
 On logged GOSC scheduling instances (search task, default price, seeds 0-29, W=100
-and W=50, as in the journal's optimality-gap analysis) it measures
+and W=50, as in the optimality-gap analysis of experiments/analyze_scheduler.py) it measures
   * how often the price alone makes the budget slack (mu* = 0), in which case the
     decoupled Lagrangian solution is exactly optimal (Theorem 2(i));
   * for the remaining instances, the exact optimum by enumeration, the actual gap
@@ -12,7 +12,7 @@ and W=50, as in the journal's optimality-gap analysis) it measures
   * the selected rates relative to the cost-efficient rate argmin s/P_s and to the
     region P_s >= 1/e.
 
-    python -m gosc_ext.analyze_theory --seeds 30
+    python -m experiments.analyze_theory --seeds 30
 """
 import argparse
 import itertools
@@ -25,7 +25,7 @@ import numpy as np
 
 from gosc import Config, Simulation
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "results_r2", "theory.json")
+OUT = os.path.join(os.path.dirname(__file__), "..", "results", "theory.json")
 
 
 def pick(groups, lam):
@@ -43,7 +43,7 @@ def pick(groups, lam):
 
 
 def lagrangian(groups, budget, price):
-    """journal lagrangian_select, returning also the multiplier and x_lambda"""
+    """lagrangian_select of gosc.schemes, returning also the multiplier and x_lambda"""
     chosen, used = pick(groups, price)
     if used <= budget:
         return chosen, price, chosen, used, False

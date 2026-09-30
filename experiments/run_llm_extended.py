@@ -1,12 +1,12 @@
-"""Revision-2 LLM experiments with the journal simulator (search task, agents 0, 2, 4
+"""Extended LLM experiments (search task, agents 0, 2, 4
 LLM-driven): a stronger 7B-class model (Qwen2.5-7B-Instruct) on 30 seeds (fixed in
 advance; about 6 min per mission on an 8 GB M1), and the Llama-3.2-3B team extended from
 30 to 50 seeds.  Missions are appended to
-results_r2/llm_r2.jsonl; LLM responses are cached in results_r2/llm_cache/ (a copy of
-the journal cache, so the journal's files are never appended to).
+results/llm_extended.jsonl; LLM responses are cached in results/llm_cache/ (shared
+with the main LLM experiments).
 
-    python -m gosc_ext.run_llm --seeds 50 --teams mixed_llama
-    python -m gosc_ext.run_llm --seeds 30 --teams mixed_qwen7b
+    python -m experiments.run_llm_extended --seeds 50 --teams mixed_llama
+    python -m experiments.run_llm_extended --seeds 30 --teams mixed_qwen7b
 """
 import argparse
 import json
@@ -16,8 +16,8 @@ import time
 from gosc import Config, run_episode
 from gosc import llm_agent
 
-ROOT = os.path.join(os.path.dirname(__file__), "..", "results_r2")
-OUT = os.path.join(ROOT, "llm_r2.jsonl")
+ROOT = os.path.join(os.path.dirname(__file__), "..", "results")
+OUT = os.path.join(ROOT, "llm_extended.jsonl")
 CACHE = os.path.join(ROOT, "llm_cache")
 TEAMS = {"mixed_qwen7b": ((0, 2, 4), "qwen2.5:7b"), "mixed_llama": ((0, 2, 4), "llama3.2:3b")}
 

@@ -1,12 +1,11 @@
 """Belief-divergence value (gosc_tv) in the K=10 and clustered search settings, which
-the journal's "where does ToM matter" experiment did not include (the "n/e" cells of
-the value-function table).  Same price grid as the journal's frontier experiment for
-this value, evaluation seeds 0-99, journal simulator; results go to
-results_r2/where_tom_tv.jsonl.  The matched-budget comparison then reuses the
-journal's own functions (experiments.plot_revision.matched), read-only.
+the "where does ToM matter" experiment of the main evaluation did not include.  Same
+price grid as the frontier experiment for this value, evaluation seeds 0-99; results go to
+results/belief_divergence.jsonl.  The matched-budget comparison then reuses the
+main-evaluation functions (experiments.plot_revision.matched).
 
-    python -m gosc_ext.run_tv_where            # simulate
-    python -m gosc_ext.run_tv_where --table    # fill the n/e cells of table_values.tex
+    python -m experiments.run_belief_divergence            # simulate
+    python -m experiments.run_belief_divergence --table    # fill the n/e cells of table_values.tex
 """
 import argparse
 import json
@@ -17,10 +16,10 @@ import numpy as np
 
 from gosc import Config, run_episode
 
-OUT = os.path.join(os.path.dirname(__file__), "..", "results_r2", "where_tom_tv.jsonl")
+OUT = os.path.join(os.path.dirname(__file__), "..", "results", "belief_divergence.jsonl")
 RES = os.path.join(os.path.dirname(__file__), "..", "results")
 FIG = os.path.join(os.path.dirname(__file__), "..", "figures")
-ETAS_TV = (0.0, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2)   # journal grid for gosc_tv
+ETAS_TV = (0.0, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2)   # frontier grid for gosc_tv
 
 
 def jobs():

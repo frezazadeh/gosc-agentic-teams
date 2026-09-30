@@ -1,19 +1,19 @@
-"""Fresh-seed validation (seeds 3000-3099) of the revision-2 experiments.
+"""Fresh-seed validation (seeds 3000-3099) of the realistic-resource experiments.
 
-Selection rule (the journal's, fixed in advance): on the evaluation seeds 0-99, take
+Selection rule (the main evaluation's, fixed in advance): on the evaluation seeds 0-99, take
 for each family the operating point with the fewest mean uplink channel uses whose
 mean outcome meets the target (1.25 x the ideal-communication completion time in the
 search task, 0.90 x its saved fraction in the rescue task); freeze it and re-run it on
 the fresh seeds, with common random numbers across methods.
 
   overhead  H = 16/32/64 bits: GOSC and the periodic family re-selected per H; H = 0
-            re-runs the journal's frozen points with the complete cost account;
+            re-runs the main-evaluation frozen points with the complete cost account;
             search default: conventional schemes too (cost table)
   noise     each value-estimation arm re-selected per setting (the periodic
-            comparator is the journal's frozen periodic point, same fresh seeds)
+            comparator is the main-evaluation frozen periodic point, same fresh seeds)
   shared    shared network-wide budgets
 
-    python -m gosc_ext.validate --only overhead noise shared
+    python -m experiments.validate_realistic --only overhead noise shared
 """
 import argparse
 import json
@@ -22,8 +22,8 @@ from multiprocessing import Pool
 
 import numpy as np
 
-from .run import ARMS, HEADLINE, OUT, SETTINGS, SHARED
-from .sim import run_ext
+from experiments.run_realistic import ARMS, HEADLINE, OUT, SETTINGS, SHARED
+from gosc import run_realistic
 
 RES = os.path.join(os.path.dirname(__file__), "..", "results")
 FRESH = range(3000, 3100)
@@ -37,20 +37,20 @@ def load_jsonl(name):
     return rows
 
 
-def journal_rows(name):
+def main_rows(name):
     with open(os.path.join(RES, f"rev_{name}.json")) as f:
         return json.load(f)["rows"]
 
 
 def reference(setting):
-    """Target of a setting from the journal's ideal-communication (genie) runs."""
+    """Target of a setting from the main-evaluation ideal-communication (genie) runs."""
     task, st = setting.split("-", 1)
     if task == "search":
         key = {"W100": "W100", "K10": "K10", "clustered": "clustered"}.get(st, "W100")
-        g = [r for r in journal_rows("genie_ref") if r["param"] == key]
+        g = [r for r in main_rows("genie_ref") if r["param"] == key]
         return "completion_time", 1.25 * float(np.mean([r["completion_time"] for r in g]))
     key = {"W100": "W100", "W50": "W50", "snr-5": "snr-5"}.get(st, "W100")
-    g = [r for r in journal_rows("rescue") if r["scheme"] == "genie" and r["param"] == f"{key}/ref"]
+    g = [r for r in main_rows("rescue") if r["scheme"] == "genie" and r["param"] == f"{key}/ref"]
     return "saved_fraction", 0.90 * float(np.mean([r["saved_fraction"] for r in g]))
 
 
@@ -93,7 +93,7 @@ def point_kw(p):
 
 def _run(a):
     cfg, scheme, seed = a
-    o = run_ext(cfg, scheme, seed)
+    o = run_realistic(cfg, scheme, seed)
     keep = ("completion_time", "saved_fraction", "symbols", "bits", "ul_tx", "ul_overhead_bits",
             "ul_ctrl_symbols", "dl_bcast_symbols", "dl_ctrl_symbols", "total_symbols", "completed")
     return {k: o[k] for k in keep if k in o}
@@ -104,14 +104,14 @@ def fresh(pool, cfg, scheme):
     return {k: [o.get(k) for o in outs] for k in outs[0]}
 
 
-def journal_frozen():
+def main_frozen():
     with open(os.path.join(RES, "rev_validation.json")) as f:
         return json.load(f)
 
 
 def overhead(pool):
     rows = load_jsonl("overhead")
-    jv = journal_frozen()
+    jv = main_frozen()
     res = {}
     for st in HEADLINE:
         metric, target = reference(st)

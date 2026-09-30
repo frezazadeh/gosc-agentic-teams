@@ -3,9 +3,9 @@ __pycache__/
 *.pyc
 .pytest_cache/
 .DS_Store
-# decompressed copies of results_r2/*.jsonl.gz
-results_r2/noise.jsonl
-results_r2/overhead.jsonl
-results_r2/shared.jsonl
+# decompressed copies of results/*.jsonl.gz
+results/noise.jsonl
+results/overhead.jsonl
+results/shared.jsonl
 # generated figures and tables
 figures/
