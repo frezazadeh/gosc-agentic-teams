@@ -1,0 +1,5 @@
+default: 900 episodes in 57s
+snr: 4200 episodes in 484s
+budget: 3000 episodes in 362s
+agents: 3000 episodes in 366s
+pareto: 700 episodes in 326s

@@ -1,0 +1,68 @@
+{
+ "W100": {
+  "instances": 12246,
+  "slack_fraction": 0.9579454515760248,
+  "binding": 515,
+  "binding_exact_fraction": 0.7611650485436893,
+  "overall_exact_fraction": 0.9899559039686429,
+  "binding_mean_gap": 0.05294503264048568,
+  "overall_mean_gap": 0.0022265794389882514,
+  "cert_zero_fraction_binding": 0.011650485436893204,
+  "cert_mean_binding": 0.11893091270391003,
+  "messages": 20591,
+  "zero_value_fraction": 0.37220144723422854,
+  "within": {
+   "0.5": 0.1266572774513137,
+   "1.0": 0.2211645864698169,
+   "2.0": 0.3753581661891118
+  },
+  "median_abs_log_theta": 1.559228720681935,
+  "evid_ps_ge_1e": 0.8176602644050885,
+  "conf_ps_ge_1e": 0.9929078014184397,
+  "conf_rate_le_eff": 1.0,
+  "conf_rate_eq_eff": 0.010638297872340425,
+  "conf_rate_min": 0.9858156028368794,
+  "intent_ps_ge_1e": 0.9818276220145379,
+  "intent_rate_le_eff": 0.9839044652128764,
+  "intent_rate_eq_eff": 0.11007268951194185,
+  "intent_rate_min": 0.3426791277258567,
+  "sent_counts": {
+   "CONF": 282,
+   "INTENT": 1926,
+   "EVID": 4009
+  }
+ },
+ "W50": {
+  "instances": 13125,
+  "slack_fraction": 0.9516190476190476,
+  "binding": 635,
+  "binding_exact_fraction": 0.84251968503937,
+  "overall_exact_fraction": 0.9923809523809524,
+  "binding_mean_gap": 0.028688437330689008,
+  "overall_mean_gap": 0.0013879739203800016,
+  "cert_zero_fraction_binding": 0.025196850393700787,
+  "cert_mean_binding": 0.07805787791314521,
+  "messages": 22486,
+  "zero_value_fraction": 0.3877968513741884,
+  "within": {
+   "0.5": 0.1145156986569421,
+   "1.0": 0.19763408342968958,
+   "2.0": 0.32589166592546476
+  },
+  "median_abs_log_theta": 1.8264770474947019,
+  "evid_ps_ge_1e": 0.6968668407310705,
+  "conf_ps_ge_1e": 0.9614325068870524,
+  "conf_rate_le_eff": 0.9889807162534435,
+  "conf_rate_eq_eff": 0.3691460055096419,
+  "conf_rate_min": 0.9834710743801653,
+  "intent_ps_ge_1e": 0.9472826086956522,
+  "intent_rate_le_eff": 0.9505434782608696,
+  "intent_rate_eq_eff": 0.19728260869565217,
+  "intent_rate_min": 0.5967391304347827,
+  "sent_counts": {
+   "CONF": 363,
+   "INTENT": 1840,
+   "EVID": 3830
+  }
+ }
+}

@@ -1,0 +1,30 @@
+{
+ "W100": {
+  "instances": 12246,
+  "optimal_fraction": 0.9899559039686429,
+  "mean_gap": 0.0022265794389882514,
+  "p99_gap": 7.926209766519519e-05,
+  "max_gap": 0.8516188583900806,
+  "additivity_pairs": 8345,
+  "additivity_median_rel_error": 0.09197394248097406,
+  "additivity_p90_rel_error": 2.8097409505683837,
+  "superadditive_fraction": 0.6393049730377471,
+  "bounded_rel_error_median": 0.09004046462663544,
+  "bounded_rel_error_p90": 1.3851595903515839,
+  "spearman_joint_vs_sum": 0.5842239294860653
+ },
+ "W50": {
+  "instances": 13125,
+  "optimal_fraction": 0.9923809523809524,
+  "mean_gap": 0.0013879739203800016,
+  "p99_gap": 0.0,
+  "max_gap": 0.629610041627585,
+  "additivity_pairs": 9361,
+  "additivity_median_rel_error": 0.08499934088313643,
+  "additivity_p90_rel_error": 2.9791661710860224,
+  "superadditive_fraction": 0.588078196773849,
+  "bounded_rel_error_median": 0.08107907639469342,
+  "bounded_rel_error_p90": 1.2512631396315899,
+  "spearman_joint_vs_sum": 0.7385885107720835
+ }
+}

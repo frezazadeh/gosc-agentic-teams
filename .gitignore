@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.DS_Store
+# decompressed copies of results_r2/*.jsonl.gz
+results_r2/noise.jsonl
+results_r2/overhead.jsonl
+results_r2/shared.jsonl
+# generated figures and tables
+manuscript/figures/*
+!manuscript/figures/.gitkeep
