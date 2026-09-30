@@ -1,8 +1,8 @@
 """Tables, figures and number macros of the revision-2 experiments.
 
 Reads results_r2/*.json[l] (and the journal's results/ read-only) and writes
-manuscript/figures/{table_*,fig_*}_r2 files and manuscript/figures/numbers_r2.tex.
-Every revision-2 number in the manuscript comes from here.
+figures/{table_*,fig_*}_r2 files and figures/numbers_r2.tex.
+Every revision-2 number in the paper comes from here.
 
     python -m gosc_ext.report
 """

@@ -19,7 +19,7 @@ from gosc import Config, run_episode
 
 OUT = os.path.join(os.path.dirname(__file__), "..", "results_r2", "where_tom_tv.jsonl")
 RES = os.path.join(os.path.dirname(__file__), "..", "results")
-FIG = os.path.join(os.path.dirname(__file__), "..", "manuscript", "figures")
+FIG = os.path.join(os.path.dirname(__file__), "..", "figures")
 ETAS_TV = (0.0, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2)   # journal grid for gosc_tv
 
 

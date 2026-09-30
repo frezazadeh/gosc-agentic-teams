@@ -12,7 +12,8 @@ import numpy as np  # noqa: E402
 
 ROOT = os.path.join(os.path.dirname(__file__), "..")
 RES = os.path.join(ROOT, "results")
-FIG = os.path.join(ROOT, "manuscript", "figures")
+FIG = os.path.join(ROOT, "figures")
+os.makedirs(FIG, exist_ok=True)
 
 # Categorical slots in fixed order (validated palette); genie is a neutral reference.
 STYLE = {

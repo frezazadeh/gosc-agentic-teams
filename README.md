@@ -47,7 +47,7 @@ Run one mission:
 ## Reproducing the paper
 
 The analysis scripts read the stored results, so every table and figure can be rebuilt in
-seconds without re-simulating; they are written to `manuscript/figures/`.
+seconds without re-simulating; they are written to `figures/`.
 
 ```bash
 .venv/bin/python -m experiments.plot                  # main evaluation
